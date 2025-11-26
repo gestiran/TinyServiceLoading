@@ -1,63 +1,125 @@
 // Copyright (c) 2023 Derek Sliman
 // Licensed under the MIT License. See LICENSE.md for details.
 
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using TinyReactive;
 using TinyReactive.Fields;
 using TinyServices.Windows;
 
 namespace TinyServices.Loading {
     public abstract class BaseLoadingService {
-        public Observed<bool> isVisible;
-        public InputListener onShow;
-        public InputListener onHide;
+        public bool isVisible { get; private set; }
         
         internal bool isForce;
+        
+        protected virtual bool _isVisible { get; }
+        
+        private InputListener _onShow;
+        private InputListener _onHide;
+        private UnloadPool _unloadShow;
+        private UnloadPool _unloadHide;
+        private bool _onShowComplete;
+        private bool _onHideComplete;
         
         public static BaseLoadingService instance { get; internal set; }
         
         protected virtual void Init() {
-            isVisible = new Observed<bool>();
-            onShow = new InputListener();
-            onHide = new InputListener();
+            isVisible = _isVisible;
+            _onShow = new InputListener();
+            _onHide = new InputListener();
+            _unloadShow = new UnloadPool();
+            _unloadHide = new UnloadPool();
+        }
+        
+        public void AddListenerShow(ActionListener listener) => AddListenerShow(listener, _unloadShow);
+        
+        public void AddListenerShow(ActionListener listener, UnloadPool unload) => _onShow.AddListener(listener, unload);
+        
+        public void AddListenerHide(ActionListener listener) => AddListenerHide(listener, _unloadHide);
+        
+        public void AddListenerHide(ActionListener listener, UnloadPool unload) => _onHide.AddListener(listener, unload);
+        
+        public void ShowForce() {
+            if (isVisible == false) {
+                isForce = true;
+                isVisible = true;
+                ShowWindow();
+            }
         }
         
         public void Show() {
-            if (isVisible.value) {
-                return;
+            if (isVisible == false) {
+                isForce = false;
+                isVisible = true;
+                ShowWindow();
             }
-            
-            isForce = false;
-            isVisible.Set(true);
-            ShowWindow();
         }
         
-        public void ShowForce() {
-            if (isVisible.value) {
-                return;
+        public void Show(ActionListener onComplete) {
+            if (isVisible == false) {
+                _onShow.AddListener(onComplete, _unloadShow);
+                isForce = false;
+                isVisible = true;
+                ShowWindow();
             }
-            
-            isForce = true;
-            isVisible.Set(true);
-            ShowWindow();
         }
         
-        public void Hide() {
-            if (isVisible.value == false) {
-                return;
+        public async UniTask ShowAsync(CancellationToken cancellation) {
+            if (isVisible == false) {
+                isForce = false;
+                isVisible = true;
+                _onShowComplete = false;
+                ShowWindow();
+                await UniTask.WaitUntil(() => _onShowComplete, PlayerLoopTiming.Update, cancellation);
             }
-            
-            isForce = false;
-            isVisible.Set(false);
-            HideWindow();
         }
         
         public void HideForce() {
-            if (isVisible.value == false) {
-                return;
+            if (isVisible) {
+                isForce = true;
+                isVisible = false;
+                HideWindow();
             }
-            
-            isForce = true;
-            isVisible.Set(false);
-            HideWindow();
+        }
+        
+        public void Hide() {
+            if (isVisible) {
+                isForce = false;
+                isVisible = false;
+                HideWindow();
+            }
+        }
+        
+        public void Hide(ActionListener onComplete) {
+            if (isVisible) {
+                _onHide.AddListener(onComplete, _unloadHide);
+                isForce = false;
+                isVisible = false;
+                HideWindow();
+            }
+        }
+        
+        public async UniTask HideAsync(CancellationToken cancellation) {
+            if (isVisible) {
+                isForce = false;
+                isVisible = false;
+                _onHideComplete = false;
+                HideWindow();
+                await UniTask.WaitUntil(() => _onHideComplete, PlayerLoopTiming.Update, cancellation);
+            }
+        }
+        
+        internal void OnShowComplete() {
+            _onShow.Send();
+            _unloadShow.Unload();
+            _onShowComplete = true;
+        }
+        
+        internal void OnHideComplete() {
+            _onHide.Send();
+            _unloadHide.Unload();
+            _onHideComplete = true;
         }
         
         protected abstract void ShowWindow();

@@ -25,9 +25,9 @@ namespace TinyServices.Loading {
             HideComplete();
         }
         
-        protected virtual void ShowComplete() => BaseLoadingService.instance.onShow.Send();
+        protected virtual void ShowComplete() => BaseLoadingService.instance.OnShowComplete();
         
-        protected virtual void HideComplete() => BaseLoadingService.instance.onHide.Send();
+        protected virtual void HideComplete() => BaseLoadingService.instance.OnHideComplete();
         
         internal override void ShowInternal() {
             isVisible = true;

@@ -1,0 +1,20 @@
+{
+    "name": "TinyServices.Loading.Runtime",
+    "rootNamespace": "TinyServices.Loading",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:1d8cf7cb5006f57428fd819399459569",
+        "GUID:4e0a720b84c89124e9d810fcff94c92f",
+        "GUID:52e8ae13a5f06b247affb7808bc8d3ff",
+        "GUID:8be63ea3d4cdf1b4baa70190ecf64f2a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

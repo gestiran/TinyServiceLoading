@@ -1,7 +1,10 @@
+// Copyright (c) 2023 Derek Sliman
+// Licensed under the MIT License. See LICENSE.md for details.
+
 using TinyServices.Windows;
 
 namespace TinyServices.Loading {
-    public abstract class LoadingWindow : WindowBehavior {
+    public abstract class BaseLoadingWindow : WindowBehavior {
         public override void Show() {
             base.Show();
             ShowComplete();
@@ -22,14 +25,14 @@ namespace TinyServices.Loading {
             HideComplete();
         }
         
-        protected void ShowComplete() => LoadingService.instance.onShow.Send();
+        protected virtual void ShowComplete() => BaseLoadingService.instance.onShow.Send();
         
-        protected void HideComplete() => LoadingService.instance.onHide.Send();
+        protected virtual void HideComplete() => BaseLoadingService.instance.onHide.Send();
         
         internal override void ShowInternal() {
             isVisible = true;
             
-            if (LoadingService.instance.isForce) {
+            if (BaseLoadingService.instance.isForce) {
                 ShowForce();
             } else {
                 Show();
@@ -39,7 +42,7 @@ namespace TinyServices.Loading {
         internal override void HideInternal() {
             isVisible = false;
             
-            if (LoadingService.instance.isForce) {
+            if (BaseLoadingService.instance.isForce) {
                 HideForce();
             } else {
                 Hide();

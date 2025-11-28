@@ -113,12 +113,14 @@ namespace TinyServices.Loading {
         internal void OnShowComplete() {
             _onShow.Send();
             _unloadShow.Unload();
+            _unloadShow.Clear();
             _onShowComplete = true;
         }
         
         internal void OnHideComplete() {
             _onHide.Send();
             _unloadHide.Unload();
+            _unloadHide.Clear();
             _onHideComplete = true;
         }
         

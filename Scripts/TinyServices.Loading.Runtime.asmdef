@@ -3,6 +3,7 @@
     "rootNamespace": "TinyServices.Loading",
     "references": [
         "UniTask",
+        "TinyMVC.Core",
         "TinyMVC.Runtime",
         "TinyUtilities.Runtime",
         "TinyReactive.Core",
